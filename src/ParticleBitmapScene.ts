@@ -80,7 +80,11 @@ export class ParticleBitmapScene {
 
         p.damp = this.randomRange(50, 150) / 1000
         p.homeForce = this.randomRange(30, 90) / 10000
-        p.setTarLoc(i * this.targetStepX, j * this.targetStepY)
+        // Small jitter breaks strict scanline bands on dense grids.
+        p.setTarLoc(
+          (i + Math.random()) * this.targetStepX,
+          (j + Math.random()) * this.targetStepY,
+        )
 
         if (!this.piece0) {
           this.piece0 = p
