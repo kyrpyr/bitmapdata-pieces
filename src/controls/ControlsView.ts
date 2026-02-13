@@ -10,6 +10,7 @@ type PresetConfig = {
   influenceRadius: number
   idleForce: number
   homeForceMultiplier: number
+  particleCount: number
 }
 
 const PRESETS: PresetConfig[] = [
@@ -22,6 +23,7 @@ const PRESETS: PresetConfig[] = [
     influenceRadius: 100,
     idleForce: -2,
     homeForceMultiplier: 1,
+    particleCount: 500,
   },
   {
     id: 'image',
@@ -32,6 +34,7 @@ const PRESETS: PresetConfig[] = [
     influenceRadius: 75,
     idleForce: 11,
     homeForceMultiplier: 0.1,
+    particleCount: 500,
   },
   {
     id: 'vortex',
@@ -42,6 +45,7 @@ const PRESETS: PresetConfig[] = [
     influenceRadius: 220,
     idleForce: 6,
     homeForceMultiplier: 0.45,
+    particleCount: 500,
   },
   {
     id: 'calm-rain',
@@ -52,6 +56,7 @@ const PRESETS: PresetConfig[] = [
     influenceRadius: 65,
     idleForce: -4,
     homeForceMultiplier: 1.65,
+    particleCount: 500,
   },
   {
     id: 'explosion',
@@ -62,6 +67,7 @@ const PRESETS: PresetConfig[] = [
     influenceRadius: 280,
     idleForce: 14,
     homeForceMultiplier: 0.2,
+    particleCount: 500,
   },
 ]
 
@@ -104,6 +110,11 @@ export class ControlsView extends EventTarget {
   private readonly homeForceTitle: HTMLSpanElement
   private readonly homeForceValue: HTMLSpanElement
   private readonly homeForceSlider: HTMLInputElement
+  private readonly particlesLabel: HTMLLabelElement
+  private readonly particlesHead: HTMLDivElement
+  private readonly particlesTitle: HTMLSpanElement
+  private readonly particlesValue: HTMLSpanElement
+  private readonly particlesSlider: HTMLInputElement
 
   constructor(model: ControlsModel) {
     super()
@@ -271,6 +282,27 @@ export class ControlsView extends EventTarget {
     this.homeForceSlider.addEventListener('input', this.handleHomeForceInput)
     this.homeForceLabel.appendChild(this.homeForceSlider)
 
+    this.particlesLabel = document.createElement('label')
+    this.particlesLabel.className = 'controls-fade'
+    this.particlesHead = document.createElement('div')
+    this.particlesHead.className = 'controls-line'
+    this.particlesTitle = document.createElement('span')
+    this.particlesTitle.textContent = 'Particles'
+    this.particlesHead.appendChild(this.particlesTitle)
+
+    this.particlesValue = document.createElement('span')
+    this.particlesValue.className = 'controls-fade-value'
+    this.particlesHead.appendChild(this.particlesValue)
+    this.particlesLabel.appendChild(this.particlesHead)
+
+    this.particlesSlider = document.createElement('input')
+    this.particlesSlider.type = 'range'
+    this.particlesSlider.min = '100'
+    this.particlesSlider.max = '800'
+    this.particlesSlider.step = '25'
+    this.particlesSlider.addEventListener('input', this.handleParticlesInput)
+    this.particlesLabel.appendChild(this.particlesSlider)
+
     this.root.appendChild(this.presetLabel)
     this.root.appendChild(this.toggleButton)
     this.root.appendChild(this.resetButton)
@@ -280,6 +312,7 @@ export class ControlsView extends EventTarget {
     this.root.appendChild(this.radiusLabel)
     this.root.appendChild(this.idleForceLabel)
     this.root.appendChild(this.homeForceLabel)
+    this.root.appendChild(this.particlesLabel)
     document.body.appendChild(this.root)
 
     this.model.addEventListener('change', this.handleModelChange)
@@ -342,6 +375,14 @@ export class ControlsView extends EventTarget {
     })
   }
 
+  private readonly handleParticlesInput = (): void => {
+    const currentState = this.model.getState()
+    this.emitState({
+      ...currentState,
+      particleCount: Number(this.particlesSlider.value),
+    })
+  }
+
   private readonly handleResetClick = (): void => {
     this.dispatchEvent(new ControlEvent(ControlEvent.RESET))
   }
@@ -361,6 +402,7 @@ export class ControlsView extends EventTarget {
       influenceRadius: preset.influenceRadius,
       idleForce: preset.idleForce,
       homeForceMultiplier: preset.homeForceMultiplier,
+      particleCount: preset.particleCount,
     })
   }
 
@@ -384,6 +426,8 @@ export class ControlsView extends EventTarget {
     this.idleForceValue.textContent = String(Math.round(state.idleForce))
     this.homeForceSlider.value = state.homeForceMultiplier.toFixed(2)
     this.homeForceValue.textContent = state.homeForceMultiplier.toFixed(2)
+    this.particlesSlider.value = String(Math.round(state.particleCount))
+    this.particlesValue.textContent = `${Math.round(state.particleCount)}x${Math.round(state.particleCount)}`
     this.presetSelect.value = this.matchPresetId(state)
   }
 
@@ -399,7 +443,8 @@ export class ControlsView extends EventTarget {
         state.damping === preset.damping &&
         state.influenceRadius === preset.influenceRadius &&
         state.idleForce === preset.idleForce &&
-        state.homeForceMultiplier === preset.homeForceMultiplier
+        state.homeForceMultiplier === preset.homeForceMultiplier &&
+        state.particleCount === preset.particleCount
       ) {
         return preset.id
       }

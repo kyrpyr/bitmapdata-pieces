@@ -15,6 +15,7 @@ export type SceneState = {
   influenceRadius: number
   idleForce: number
   homeForceMultiplier: number
+  particleCount: number
 }
 
 const DEFAULT_OPTIONS: SceneOptions = {
@@ -53,6 +54,7 @@ export class ParticleBitmapScene {
       influenceRadius: 100,
       idleForce: -2,
       homeForceMultiplier: 1,
+      particleCount: this.options.cols,
     }
 
     this.stats = new Stats()
@@ -116,6 +118,15 @@ export class ParticleBitmapScene {
     this.state.influenceRadius = Math.max(20, Math.min(300, nextState.influenceRadius))
     this.state.idleForce = Math.max(-20, Math.min(20, nextState.idleForce))
     this.state.homeForceMultiplier = Math.max(0.1, Math.min(3, nextState.homeForceMultiplier))
+    const nextParticleCount = Math.max(100, Math.min(800, Math.round(nextState.particleCount)))
+    if (nextParticleCount !== this.state.particleCount) {
+      this.state.particleCount = nextParticleCount
+      this.options.cols = nextParticleCount
+      this.options.rows = nextParticleCount
+      this.targetStepX = this.width / this.options.cols
+      this.targetStepY = this.height / this.options.rows
+      this.setupPieces()
+    }
 
     if (nextState.isRunning) {
       this.start()

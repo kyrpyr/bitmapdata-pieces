@@ -6,6 +6,7 @@ export type ControlsState = {
   influenceRadius: number
   idleForce: number
   homeForceMultiplier: number
+  particleCount: number
 }
 
 export class ControlsModel extends EventTarget {
@@ -24,7 +25,8 @@ export class ControlsModel extends EventTarget {
       this.state.damping === nextState.damping &&
       this.state.influenceRadius === nextState.influenceRadius &&
       this.state.idleForce === nextState.idleForce &&
-      this.state.homeForceMultiplier === nextState.homeForceMultiplier
+      this.state.homeForceMultiplier === nextState.homeForceMultiplier &&
+      this.state.particleCount === nextState.particleCount
     ) {
       return
     }
