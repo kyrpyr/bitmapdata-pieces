@@ -8,8 +8,8 @@ type SceneOptions = {
 }
 
 const DEFAULT_OPTIONS: SceneOptions = {
-  cols: 200,
-  rows: 200,
+  cols: 500,
+  rows: 500,
   fade: 0.9,
 }
 
