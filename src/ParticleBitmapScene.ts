@@ -29,6 +29,9 @@ export class ParticleBitmapScene {
   private mouseX = 0
   private mouseY = 0
   private mouseDown = false
+  private isStarted = false
+  private isRunning = false
+  private frameId: number | null = null
 
   constructor(root: HTMLElement, partialOptions: Partial<SceneOptions> = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...partialOptions }
@@ -36,7 +39,8 @@ export class ParticleBitmapScene {
     this.stats = new Stats()
     this.stats.showPanel(0)
     this.stats.dom.style.position = 'fixed'
-    this.stats.dom.style.left = '0'
+    this.stats.dom.style.left = 'auto'
+    this.stats.dom.style.right = '0'
     this.stats.dom.style.top = '0'
     document.body.appendChild(this.stats.dom)
 
@@ -60,9 +64,30 @@ export class ParticleBitmapScene {
   }
 
   public start(): void {
-    this.setupInput()
-    window.addEventListener('resize', this.handleResize)
-    requestAnimationFrame(this.animate)
+    if (!this.isStarted) {
+      this.setupInput()
+      window.addEventListener('resize', this.handleResize)
+      this.isStarted = true
+    }
+
+    if (this.isRunning) {
+      return
+    }
+
+    this.isRunning = true
+    this.frameId = requestAnimationFrame(this.animate)
+  }
+
+  public stop(): void {
+    this.isRunning = false
+    if (this.frameId !== null) {
+      cancelAnimationFrame(this.frameId)
+      this.frameId = null
+    }
+  }
+
+  public getRunningState(): boolean {
+    return this.isRunning
   }
 
   private setupPieces(): void {
@@ -133,6 +158,10 @@ export class ParticleBitmapScene {
   }
 
   private readonly animate = (): void => {
+    if (!this.isRunning) {
+      return
+    }
+
     this.stats.begin()
 
     for (let i = 0; i < this.pixels.length; i += 4) {
@@ -170,7 +199,7 @@ export class ParticleBitmapScene {
 
     this.ctx.putImageData(this.imageData, 0, 0)
     this.stats.end()
-    requestAnimationFrame(this.animate)
+    this.frameId = requestAnimationFrame(this.animate)
   }
 
   private randomRange(min: number, max: number): number {
