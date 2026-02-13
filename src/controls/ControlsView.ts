@@ -33,6 +33,36 @@ const PRESETS: PresetConfig[] = [
     idleForce: 11,
     homeForceMultiplier: 0.1,
   },
+  {
+    id: 'vortex',
+    label: 'Vortex',
+    fade: 0.96,
+    clickForce: 420,
+    damping: 0.72,
+    influenceRadius: 220,
+    idleForce: 6,
+    homeForceMultiplier: 0.45,
+  },
+  {
+    id: 'calm-rain',
+    label: 'Calm Rain',
+    fade: 0.89,
+    clickForce: 120,
+    damping: 1.55,
+    influenceRadius: 65,
+    idleForce: -4,
+    homeForceMultiplier: 1.65,
+  },
+  {
+    id: 'explosion',
+    label: 'Explosion',
+    fade: 0.995,
+    clickForce: 500,
+    damping: 0.55,
+    influenceRadius: 280,
+    idleForce: 14,
+    homeForceMultiplier: 0.2,
+  },
 ]
 
 export class ControlsView extends EventTarget {
