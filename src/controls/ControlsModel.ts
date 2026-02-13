@@ -3,6 +3,9 @@ export type ControlsState = {
   fade: number
   clickForce: number
   damping: number
+  influenceRadius: number
+  idleForce: number
+  homeForceMultiplier: number
 }
 
 export class ControlsModel extends EventTarget {
@@ -18,7 +21,10 @@ export class ControlsModel extends EventTarget {
       this.state.isRunning === nextState.isRunning &&
       this.state.fade === nextState.fade &&
       this.state.clickForce === nextState.clickForce &&
-      this.state.damping === nextState.damping
+      this.state.damping === nextState.damping &&
+      this.state.influenceRadius === nextState.influenceRadius &&
+      this.state.idleForce === nextState.idleForce &&
+      this.state.homeForceMultiplier === nextState.homeForceMultiplier
     ) {
       return
     }

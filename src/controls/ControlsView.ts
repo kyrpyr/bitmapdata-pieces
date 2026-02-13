@@ -21,6 +21,21 @@ export class ControlsView extends EventTarget {
   private readonly dampingTitle: HTMLSpanElement
   private readonly dampingValue: HTMLSpanElement
   private readonly dampingSlider: HTMLInputElement
+  private readonly radiusLabel: HTMLLabelElement
+  private readonly radiusHead: HTMLDivElement
+  private readonly radiusTitle: HTMLSpanElement
+  private readonly radiusValue: HTMLSpanElement
+  private readonly radiusSlider: HTMLInputElement
+  private readonly idleForceLabel: HTMLLabelElement
+  private readonly idleForceHead: HTMLDivElement
+  private readonly idleForceTitle: HTMLSpanElement
+  private readonly idleForceValue: HTMLSpanElement
+  private readonly idleForceSlider: HTMLInputElement
+  private readonly homeForceLabel: HTMLLabelElement
+  private readonly homeForceHead: HTMLDivElement
+  private readonly homeForceTitle: HTMLSpanElement
+  private readonly homeForceValue: HTMLSpanElement
+  private readonly homeForceSlider: HTMLInputElement
 
   constructor(model: ControlsModel) {
     super()
@@ -101,11 +116,77 @@ export class ControlsView extends EventTarget {
     this.dampingSlider.addEventListener('input', this.handleDampingInput)
     this.dampingLabel.appendChild(this.dampingSlider)
 
+    this.radiusLabel = document.createElement('label')
+    this.radiusLabel.className = 'controls-fade'
+    this.radiusHead = document.createElement('div')
+    this.radiusHead.className = 'controls-line'
+    this.radiusTitle = document.createElement('span')
+    this.radiusTitle.textContent = 'Radius'
+    this.radiusHead.appendChild(this.radiusTitle)
+
+    this.radiusValue = document.createElement('span')
+    this.radiusValue.className = 'controls-fade-value'
+    this.radiusHead.appendChild(this.radiusValue)
+    this.radiusLabel.appendChild(this.radiusHead)
+
+    this.radiusSlider = document.createElement('input')
+    this.radiusSlider.type = 'range'
+    this.radiusSlider.min = '20'
+    this.radiusSlider.max = '300'
+    this.radiusSlider.step = '5'
+    this.radiusSlider.addEventListener('input', this.handleRadiusInput)
+    this.radiusLabel.appendChild(this.radiusSlider)
+
+    this.idleForceLabel = document.createElement('label')
+    this.idleForceLabel.className = 'controls-fade'
+    this.idleForceHead = document.createElement('div')
+    this.idleForceHead.className = 'controls-line'
+    this.idleForceTitle = document.createElement('span')
+    this.idleForceTitle.textContent = 'Idle force'
+    this.idleForceHead.appendChild(this.idleForceTitle)
+
+    this.idleForceValue = document.createElement('span')
+    this.idleForceValue.className = 'controls-fade-value'
+    this.idleForceHead.appendChild(this.idleForceValue)
+    this.idleForceLabel.appendChild(this.idleForceHead)
+
+    this.idleForceSlider = document.createElement('input')
+    this.idleForceSlider.type = 'range'
+    this.idleForceSlider.min = '-20'
+    this.idleForceSlider.max = '20'
+    this.idleForceSlider.step = '1'
+    this.idleForceSlider.addEventListener('input', this.handleIdleForceInput)
+    this.idleForceLabel.appendChild(this.idleForceSlider)
+
+    this.homeForceLabel = document.createElement('label')
+    this.homeForceLabel.className = 'controls-fade'
+    this.homeForceHead = document.createElement('div')
+    this.homeForceHead.className = 'controls-line'
+    this.homeForceTitle = document.createElement('span')
+    this.homeForceTitle.textContent = 'Home force'
+    this.homeForceHead.appendChild(this.homeForceTitle)
+
+    this.homeForceValue = document.createElement('span')
+    this.homeForceValue.className = 'controls-fade-value'
+    this.homeForceHead.appendChild(this.homeForceValue)
+    this.homeForceLabel.appendChild(this.homeForceHead)
+
+    this.homeForceSlider = document.createElement('input')
+    this.homeForceSlider.type = 'range'
+    this.homeForceSlider.min = '0.1'
+    this.homeForceSlider.max = '3'
+    this.homeForceSlider.step = '0.01'
+    this.homeForceSlider.addEventListener('input', this.handleHomeForceInput)
+    this.homeForceLabel.appendChild(this.homeForceSlider)
+
     this.root.appendChild(this.toggleButton)
     this.root.appendChild(this.resetButton)
     this.root.appendChild(this.fadeLabel)
     this.root.appendChild(this.forceLabel)
     this.root.appendChild(this.dampingLabel)
+    this.root.appendChild(this.radiusLabel)
+    this.root.appendChild(this.idleForceLabel)
+    this.root.appendChild(this.homeForceLabel)
     document.body.appendChild(this.root)
 
     this.model.addEventListener('change', this.handleModelChange)
@@ -144,6 +225,30 @@ export class ControlsView extends EventTarget {
     })
   }
 
+  private readonly handleRadiusInput = (): void => {
+    const currentState = this.model.getState()
+    this.emitState({
+      ...currentState,
+      influenceRadius: Number(this.radiusSlider.value),
+    })
+  }
+
+  private readonly handleIdleForceInput = (): void => {
+    const currentState = this.model.getState()
+    this.emitState({
+      ...currentState,
+      idleForce: Number(this.idleForceSlider.value),
+    })
+  }
+
+  private readonly handleHomeForceInput = (): void => {
+    const currentState = this.model.getState()
+    this.emitState({
+      ...currentState,
+      homeForceMultiplier: Number(this.homeForceSlider.value),
+    })
+  }
+
   private readonly handleResetClick = (): void => {
     this.dispatchEvent(new ControlEvent(ControlEvent.RESET))
   }
@@ -162,6 +267,12 @@ export class ControlsView extends EventTarget {
     this.forceValue.textContent = String(Math.round(state.clickForce))
     this.dampingSlider.value = state.damping.toFixed(2)
     this.dampingValue.textContent = state.damping.toFixed(2)
+    this.radiusSlider.value = String(Math.round(state.influenceRadius))
+    this.radiusValue.textContent = String(Math.round(state.influenceRadius))
+    this.idleForceSlider.value = String(Math.round(state.idleForce))
+    this.idleForceValue.textContent = String(Math.round(state.idleForce))
+    this.homeForceSlider.value = state.homeForceMultiplier.toFixed(2)
+    this.homeForceValue.textContent = state.homeForceMultiplier.toFixed(2)
   }
 
   private emitState(state: ControlsState): void {

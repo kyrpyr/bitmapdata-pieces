@@ -12,6 +12,9 @@ export type SceneState = {
   fade: number
   clickForce: number
   damping: number
+  influenceRadius: number
+  idleForce: number
+  homeForceMultiplier: number
 }
 
 const DEFAULT_OPTIONS: SceneOptions = {
@@ -47,6 +50,9 @@ export class ParticleBitmapScene {
       fade: this.options.fade,
       clickForce: 200,
       damping: 1,
+      influenceRadius: 100,
+      idleForce: -2,
+      homeForceMultiplier: 1,
     }
 
     this.stats = new Stats()
@@ -107,6 +113,9 @@ export class ParticleBitmapScene {
     this.state.fade = Math.max(0.85, Math.min(1, nextState.fade))
     this.state.clickForce = Math.max(50, Math.min(500, nextState.clickForce))
     this.state.damping = Math.max(0.5, Math.min(2, nextState.damping))
+    this.state.influenceRadius = Math.max(20, Math.min(300, nextState.influenceRadius))
+    this.state.idleForce = Math.max(-20, Math.min(20, nextState.idleForce))
+    this.state.homeForceMultiplier = Math.max(0.1, Math.min(3, nextState.homeForceMultiplier))
 
     if (nextState.isRunning) {
       this.start()
@@ -134,7 +143,8 @@ export class ParticleBitmapScene {
 
         p.baseDamp = this.randomRange(50, 150) / 1000
         p.damp = p.baseDamp * this.state.damping
-        p.homeForce = this.randomRange(30, 90) / 10000
+        p.baseHomeForce = this.randomRange(30, 90) / 10000
+        p.homeForce = p.baseHomeForce * this.state.homeForceMultiplier
         // Small jitter breaks strict scanline bands on dense grids.
         p.setTarLoc(
           (i + Math.random()) * this.targetStepX,
@@ -201,7 +211,7 @@ export class ParticleBitmapScene {
       this.pixels[i + 3] = 255
     }
 
-    let force = -2
+    let force = this.state.idleForce
     if (this.mouseDown) {
       this.mouseDown = false
       force = -this.state.clickForce
@@ -210,7 +220,8 @@ export class ParticleBitmapScene {
     let p = this.piece0
     while (p) {
       p.damp = p.baseDamp * this.state.damping
-      p.addForce(this.mouseX, this.mouseY, 100, force)
+      p.homeForce = p.baseHomeForce * this.state.homeForceMultiplier
+      p.addForce(this.mouseX, this.mouseY, this.state.influenceRadius, force)
       p.seekHome()
       p.addDamping()
       p.update()
