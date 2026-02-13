@@ -73,3 +73,12 @@ body {
 .controls-fade-value {
   color: #f9fafb;
 }
+
+.controls-select {
+  border: 1px solid #374151;
+  background: rgba(17, 24, 39, 0.9);
+  color: #f9fafb;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+}

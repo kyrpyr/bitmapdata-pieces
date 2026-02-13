@@ -1,9 +1,47 @@
 import { ControlEvent } from './ControlEvent'
 import { ControlsModel, type ControlsState } from './ControlsModel'
 
+type PresetConfig = {
+  id: string
+  label: string
+  fade: number
+  clickForce: number
+  damping: number
+  influenceRadius: number
+  idleForce: number
+  homeForceMultiplier: number
+}
+
+const PRESETS: PresetConfig[] = [
+  {
+    id: 'default',
+    label: 'Default',
+    fade: 0.9,
+    clickForce: 200,
+    damping: 1,
+    influenceRadius: 100,
+    idleForce: -2,
+    homeForceMultiplier: 1,
+  },
+  {
+    id: 'image',
+    label: 'Fun',
+    fade: 0.9,
+    clickForce: 500,
+    damping: 1,
+    influenceRadius: 75,
+    idleForce: 11,
+    homeForceMultiplier: 0.1,
+  },
+]
+
 export class ControlsView extends EventTarget {
   private readonly model: ControlsModel
   private readonly root: HTMLDivElement
+  private readonly presetLabel: HTMLLabelElement
+  private readonly presetHead: HTMLDivElement
+  private readonly presetTitle: HTMLSpanElement
+  private readonly presetSelect: HTMLSelectElement
   private readonly toggleButton: HTMLButtonElement
   private readonly resetButton: HTMLButtonElement
   private readonly fadeLabel: HTMLLabelElement
@@ -43,6 +81,30 @@ export class ControlsView extends EventTarget {
 
     this.root = document.createElement('div')
     this.root.className = 'controls'
+
+    this.presetLabel = document.createElement('label')
+    this.presetLabel.className = 'controls-fade'
+    this.presetHead = document.createElement('div')
+    this.presetHead.className = 'controls-line'
+    this.presetTitle = document.createElement('span')
+    this.presetTitle.textContent = 'Preset'
+    this.presetHead.appendChild(this.presetTitle)
+    this.presetLabel.appendChild(this.presetHead)
+
+    this.presetSelect = document.createElement('select')
+    this.presetSelect.className = 'controls-select'
+    for (const preset of PRESETS) {
+      const option = document.createElement('option')
+      option.value = preset.id
+      option.textContent = preset.label
+      this.presetSelect.appendChild(option)
+    }
+    const customOption = document.createElement('option')
+    customOption.value = 'custom'
+    customOption.textContent = 'Custom'
+    this.presetSelect.appendChild(customOption)
+    this.presetSelect.addEventListener('change', this.handlePresetChange)
+    this.presetLabel.appendChild(this.presetSelect)
 
     this.toggleButton = document.createElement('button')
     this.toggleButton.type = 'button'
@@ -179,6 +241,7 @@ export class ControlsView extends EventTarget {
     this.homeForceSlider.addEventListener('input', this.handleHomeForceInput)
     this.homeForceLabel.appendChild(this.homeForceSlider)
 
+    this.root.appendChild(this.presetLabel)
     this.root.appendChild(this.toggleButton)
     this.root.appendChild(this.resetButton)
     this.root.appendChild(this.fadeLabel)
@@ -253,6 +316,24 @@ export class ControlsView extends EventTarget {
     this.dispatchEvent(new ControlEvent(ControlEvent.RESET))
   }
 
+  private readonly handlePresetChange = (): void => {
+    const preset = PRESETS.find((item) => item.id === this.presetSelect.value)
+    if (!preset) {
+      return
+    }
+
+    const currentState = this.model.getState()
+    this.emitState({
+      ...currentState,
+      fade: preset.fade,
+      clickForce: preset.clickForce,
+      damping: preset.damping,
+      influenceRadius: preset.influenceRadius,
+      idleForce: preset.idleForce,
+      homeForceMultiplier: preset.homeForceMultiplier,
+    })
+  }
+
   private readonly handleModelChange = (): void => {
     this.render()
   }
@@ -273,9 +354,26 @@ export class ControlsView extends EventTarget {
     this.idleForceValue.textContent = String(Math.round(state.idleForce))
     this.homeForceSlider.value = state.homeForceMultiplier.toFixed(2)
     this.homeForceValue.textContent = state.homeForceMultiplier.toFixed(2)
+    this.presetSelect.value = this.matchPresetId(state)
   }
 
   private emitState(state: ControlsState): void {
     this.dispatchEvent(new ControlEvent(ControlEvent.STATE_CHANGE, state))
+  }
+
+  private matchPresetId(state: ControlsState): string {
+    for (const preset of PRESETS) {
+      if (
+        state.fade === preset.fade &&
+        state.clickForce === preset.clickForce &&
+        state.damping === preset.damping &&
+        state.influenceRadius === preset.influenceRadius &&
+        state.idleForce === preset.idleForce &&
+        state.homeForceMultiplier === preset.homeForceMultiplier
+      ) {
+        return preset.id
+      }
+    }
+    return 'custom'
   }
 }
