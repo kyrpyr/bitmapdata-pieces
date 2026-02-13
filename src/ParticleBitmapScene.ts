@@ -110,7 +110,7 @@ export class ParticleBitmapScene {
   }
 
   public reset(): void {
-    this.resetSimulation()
+    this.setupPieces()
   }
 
   private setupPieces(): void {
@@ -141,20 +141,6 @@ export class ParticleBitmapScene {
         }
         prev = p
       }
-    }
-  }
-
-  private resetSimulation(): void {
-    this.setupPieces()
-    this.clearFrameBuffer()
-  }
-
-  private clearFrameBuffer(): void {
-    for (let i = 0; i < this.pixels.length; i += 4) {
-      this.pixels[i] = 0
-      this.pixels[i + 1] = 0
-      this.pixels[i + 2] = 0
-      this.pixels[i + 3] = 255
     }
   }
 
