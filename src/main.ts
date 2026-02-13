@@ -1,4 +1,5 @@
 import './style.css'
+import Stats from 'stats.js'
 
 const BMD_WIDTH = 465
 const BMD_HEIGHT = 465
@@ -81,6 +82,13 @@ if (!app) {
   throw new Error('Missing #app element')
 }
 
+const stats = new Stats()
+stats.showPanel(0)
+stats.dom.style.position = 'fixed'
+stats.dom.style.left = '0'
+stats.dom.style.top = '0'
+document.body.appendChild(stats.dom)
+
 app.innerHTML = '<canvas id="scene" width="465" height="465"></canvas>'
 const canvas = document.querySelector<HTMLCanvasElement>('#scene')
 if (!canvas) {
@@ -141,6 +149,8 @@ canvasEl.addEventListener('pointerdown', (event) => {
 })
 
 function animate(): void {
+  stats.begin()
+
   for (let i = 0; i < pixels.length; i += 4) {
     pixels[i] *= COLOR_FADE
     pixels[i + 1] *= COLOR_FADE
@@ -175,6 +185,7 @@ function animate(): void {
   }
 
   ctx2d.putImageData(imageData, 0, 0)
+  stats.end()
   requestAnimationFrame(animate)
 }
 
