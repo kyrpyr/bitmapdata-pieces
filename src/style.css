@@ -25,8 +25,8 @@ body {
 }
 
 #scene {
-  width: 465px;
-  height: 465px;
+  width: 100vw;
+  height: 100vh;
   display: block;
   image-rendering: pixelated;
 }
