@@ -10,3 +10,11 @@ if (!app) {
 const scene = new ParticleBitmapScene(app)
 scene.start()
 new ControlsController(scene)
+
+const sourceLink = document.createElement('a')
+sourceLink.className = 'github-button'
+sourceLink.href = 'https://github.com/kyrpyr/bitmapdata-pieces'
+sourceLink.target = '_blank'
+sourceLink.rel = 'noopener noreferrer'
+sourceLink.textContent = 'View on GitHub'
+document.body.appendChild(sourceLink)
