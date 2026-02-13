@@ -175,8 +175,12 @@ export class ParticleBitmapScene {
   private setupInput(): void {
     this.canvas.addEventListener('pointermove', this.updateMousePosition)
     this.canvas.addEventListener('pointerdown', (event) => {
+      event.preventDefault()
       this.updateMousePosition(event)
       this.mouseDown = true
+    })
+    this.canvas.addEventListener('pointermove', (event) => {
+      event.preventDefault()
     })
   }
 

@@ -304,6 +304,7 @@ export class ControlsView extends EventTarget {
     this.particlesLabel.appendChild(this.particlesSlider)
 
     this.root.appendChild(this.presetLabel)
+    this.root.appendChild(this.particlesLabel)
     this.root.appendChild(this.toggleButton)
     this.root.appendChild(this.resetButton)
     this.root.appendChild(this.fadeLabel)
@@ -312,7 +313,6 @@ export class ControlsView extends EventTarget {
     this.root.appendChild(this.radiusLabel)
     this.root.appendChild(this.idleForceLabel)
     this.root.appendChild(this.homeForceLabel)
-    this.root.appendChild(this.particlesLabel)
     document.body.appendChild(this.root)
 
     this.model.addEventListener('change', this.handleModelChange)

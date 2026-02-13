@@ -16,6 +16,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #000000;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 #app {
@@ -29,6 +31,9 @@ body {
   height: 100vh;
   display: block;
   image-rendering: pixelated;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .controls {
@@ -39,6 +44,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: calc(100dvh - 76px);
+  overflow-y: auto;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .controls button {
