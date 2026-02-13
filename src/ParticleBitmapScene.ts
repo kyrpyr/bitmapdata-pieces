@@ -10,6 +10,7 @@ type SceneOptions = {
 export type SceneState = {
   isRunning: boolean
   fade: number
+  clickForce: number
 }
 
 const DEFAULT_OPTIONS: SceneOptions = {
@@ -43,6 +44,7 @@ export class ParticleBitmapScene {
     this.state = {
       isRunning: false,
       fade: this.options.fade,
+      clickForce: 200,
     }
 
     this.stats = new Stats()
@@ -101,6 +103,7 @@ export class ParticleBitmapScene {
 
   public setState(nextState: SceneState): void {
     this.state.fade = Math.max(0.85, Math.min(1, nextState.fade))
+    this.state.clickForce = Math.max(50, Math.min(500, nextState.clickForce))
 
     if (nextState.isRunning) {
       this.start()
@@ -197,7 +200,7 @@ export class ParticleBitmapScene {
     let force = -2
     if (this.mouseDown) {
       this.mouseDown = false
-      force = -200
+      force = -this.state.clickForce
     }
 
     let p = this.piece0

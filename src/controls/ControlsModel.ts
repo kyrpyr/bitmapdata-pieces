@@ -1,6 +1,7 @@
 export type ControlsState = {
   isRunning: boolean
   fade: number
+  clickForce: number
 }
 
 export class ControlsModel extends EventTarget {
@@ -14,7 +15,8 @@ export class ControlsModel extends EventTarget {
   public setState(nextState: ControlsState): void {
     if (
       this.state.isRunning === nextState.isRunning &&
-      this.state.fade === nextState.fade
+      this.state.fade === nextState.fade &&
+      this.state.clickForce === nextState.clickForce
     ) {
       return
     }

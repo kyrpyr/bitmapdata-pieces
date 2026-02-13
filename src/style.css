@@ -63,6 +63,13 @@ body {
   color: #d1d5db;
 }
 
+.controls-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .controls-fade-value {
   color: #f9fafb;
 }
