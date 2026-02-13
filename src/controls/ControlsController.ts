@@ -1,6 +1,6 @@
 import { ParticleBitmapScene } from '../ParticleBitmapScene'
 import { ControlEvent } from './ControlEvent'
-import { ControlsModel } from './ControlsModel'
+import { ControlsModel, type ControlsState } from './ControlsModel'
 import { ControlsView } from './ControlsView'
 
 export class ControlsController {
@@ -10,22 +10,20 @@ export class ControlsController {
 
   constructor(scene: ParticleBitmapScene) {
     this.scene = scene
-    this.model = new ControlsModel(this.scene.getRunningState())
+    this.model = new ControlsModel(this.scene.getState())
     this.view = new ControlsView(this.model)
-    this.view.addEventListener(ControlEvent.TOGGLE, this.handleControlEvent)
+    this.view.addEventListener(ControlEvent.STATE_CHANGE, this.handleStateEvent)
   }
 
-  private readonly handleControlEvent = (event: Event): void => {
-    if (event.type !== ControlEvent.TOGGLE) {
+  private readonly handleStateEvent = (event: Event): void => {
+    if (event.type !== ControlEvent.STATE_CHANGE) {
       return
     }
 
-    if (this.model.getRunning()) {
-      this.scene.stop()
-    } else {
-      this.scene.start()
-    }
+    const stateEvent = event as ControlEvent
+    const nextState: ControlsState = stateEvent.state
 
-    this.model.setRunning(this.scene.getRunningState())
+    this.scene.setState(nextState)
+    this.model.setState(this.scene.getState())
   }
 }

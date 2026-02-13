@@ -7,6 +7,11 @@ type SceneOptions = {
   fade: number
 }
 
+export type SceneState = {
+  isRunning: boolean
+  fade: number
+}
+
 const DEFAULT_OPTIONS: SceneOptions = {
   cols: 500,
   rows: 500,
@@ -30,11 +35,15 @@ export class ParticleBitmapScene {
   private mouseY = 0
   private mouseDown = false
   private isStarted = false
-  private isRunning = false
+  private state: SceneState
   private frameId: number | null = null
 
   constructor(root: HTMLElement, partialOptions: Partial<SceneOptions> = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...partialOptions }
+    this.state = {
+      isRunning: false,
+      fade: this.options.fade,
+    }
 
     this.stats = new Stats()
     this.stats.showPanel(0)
@@ -70,24 +79,33 @@ export class ParticleBitmapScene {
       this.isStarted = true
     }
 
-    if (this.isRunning) {
+    if (this.state.isRunning) {
       return
     }
 
-    this.isRunning = true
+    this.state.isRunning = true
     this.frameId = requestAnimationFrame(this.animate)
   }
 
   public stop(): void {
-    this.isRunning = false
+    this.state.isRunning = false
     if (this.frameId !== null) {
       cancelAnimationFrame(this.frameId)
       this.frameId = null
     }
   }
 
-  public getRunningState(): boolean {
-    return this.isRunning
+  public getState(): SceneState {
+    return { ...this.state }
+  }
+
+  public setState(nextState: SceneState): void {
+    this.state.fade = Math.max(0.85, Math.min(1, nextState.fade))
+    if (nextState.isRunning) {
+      this.start()
+    } else {
+      this.stop()
+    }
   }
 
   private setupPieces(): void {
@@ -158,16 +176,16 @@ export class ParticleBitmapScene {
   }
 
   private readonly animate = (): void => {
-    if (!this.isRunning) {
+    if (!this.state.isRunning) {
       return
     }
 
     this.stats.begin()
 
     for (let i = 0; i < this.pixels.length; i += 4) {
-      this.pixels[i] *= this.options.fade
-      this.pixels[i + 1] *= this.options.fade
-      this.pixels[i + 2] *= this.options.fade
+      this.pixels[i] *= this.state.fade
+      this.pixels[i + 1] *= this.state.fade
+      this.pixels[i + 2] *= this.state.fade
       this.pixels[i + 3] = 255
     }
 

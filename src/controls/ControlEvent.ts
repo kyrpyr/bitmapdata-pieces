@@ -1,7 +1,11 @@
-export class ControlEvent extends Event {
-  public static readonly TOGGLE = 'toggle'
+import type { ControlsState } from './ControlsModel'
 
-  constructor(type: string) {
-    super(type)
+export class ControlEvent extends Event {
+  public static readonly STATE_CHANGE = 'state_change'
+  public readonly state: ControlsState
+
+  constructor(state: ControlsState) {
+    super(ControlEvent.STATE_CHANGE)
+    this.state = state
   }
 }

@@ -1,21 +1,29 @@
-export class ControlsModel extends EventTarget {
-  private isRunning: boolean
+export type ControlsState = {
+  isRunning: boolean
+  fade: number
+}
 
-  constructor(initialRunning: boolean) {
+export class ControlsModel extends EventTarget {
+  private state: ControlsState
+
+  constructor(initialState: ControlsState) {
     super()
-    this.isRunning = initialRunning
+    this.state = { ...initialState }
   }
 
-  public setRunning(next: boolean): void {
-    if (this.isRunning === next) {
+  public setState(nextState: ControlsState): void {
+    if (
+      this.state.isRunning === nextState.isRunning &&
+      this.state.fade === nextState.fade
+    ) {
       return
     }
 
-    this.isRunning = next
+    this.state = { ...nextState }
     this.dispatchEvent(new Event('change'))
   }
 
-  public getRunning(): boolean {
-    return this.isRunning
+  public getState(): ControlsState {
+    return { ...this.state }
   }
 }
