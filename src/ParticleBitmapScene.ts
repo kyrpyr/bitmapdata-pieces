@@ -101,11 +101,16 @@ export class ParticleBitmapScene {
 
   public setState(nextState: SceneState): void {
     this.state.fade = Math.max(0.85, Math.min(1, nextState.fade))
+
     if (nextState.isRunning) {
       this.start()
     } else {
       this.stop()
     }
+  }
+
+  public reset(): void {
+    this.resetSimulation()
   }
 
   private setupPieces(): void {
@@ -136,6 +141,20 @@ export class ParticleBitmapScene {
         }
         prev = p
       }
+    }
+  }
+
+  private resetSimulation(): void {
+    this.setupPieces()
+    this.clearFrameBuffer()
+  }
+
+  private clearFrameBuffer(): void {
+    for (let i = 0; i < this.pixels.length; i += 4) {
+      this.pixels[i] = 0
+      this.pixels[i + 1] = 0
+      this.pixels[i + 2] = 0
+      this.pixels[i + 3] = 255
     }
   }
 

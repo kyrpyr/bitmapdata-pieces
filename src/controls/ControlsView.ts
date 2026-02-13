@@ -5,6 +5,7 @@ export class ControlsView extends EventTarget {
   private readonly model: ControlsModel
   private readonly root: HTMLDivElement
   private readonly toggleButton: HTMLButtonElement
+  private readonly resetButton: HTMLButtonElement
   private readonly fadeLabel: HTMLLabelElement
   private readonly fadeValue: HTMLSpanElement
   private readonly fadeSlider: HTMLInputElement
@@ -19,6 +20,11 @@ export class ControlsView extends EventTarget {
     this.toggleButton = document.createElement('button')
     this.toggleButton.type = 'button'
     this.toggleButton.addEventListener('click', this.handleToggleClick)
+
+    this.resetButton = document.createElement('button')
+    this.resetButton.type = 'button'
+    this.resetButton.textContent = 'Reset'
+    this.resetButton.addEventListener('click', this.handleResetClick)
 
     this.fadeLabel = document.createElement('label')
     this.fadeLabel.className = 'controls-fade'
@@ -37,6 +43,7 @@ export class ControlsView extends EventTarget {
     this.fadeLabel.appendChild(this.fadeSlider)
 
     this.root.appendChild(this.toggleButton)
+    this.root.appendChild(this.resetButton)
     this.root.appendChild(this.fadeLabel)
     document.body.appendChild(this.root)
 
@@ -60,6 +67,10 @@ export class ControlsView extends EventTarget {
     })
   }
 
+  private readonly handleResetClick = (): void => {
+    this.dispatchEvent(new ControlEvent(ControlEvent.RESET))
+  }
+
   private readonly handleModelChange = (): void => {
     this.render()
   }
@@ -73,6 +84,6 @@ export class ControlsView extends EventTarget {
   }
 
   private emitState(state: ControlsState): void {
-    this.dispatchEvent(new ControlEvent(state))
+    this.dispatchEvent(new ControlEvent(ControlEvent.STATE_CHANGE, state))
   }
 }

@@ -2,10 +2,11 @@ import type { ControlsState } from './ControlsModel'
 
 export class ControlEvent extends Event {
   public static readonly STATE_CHANGE = 'state_change'
-  public readonly state: ControlsState
+  public static readonly RESET = 'reset'
+  public readonly state: ControlsState | null
 
-  constructor(state: ControlsState) {
-    super(ControlEvent.STATE_CHANGE)
+  constructor(type: string, state: ControlsState | null = null) {
+    super(type)
     this.state = state
   }
 }

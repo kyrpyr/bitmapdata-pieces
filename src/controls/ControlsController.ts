@@ -13,6 +13,7 @@ export class ControlsController {
     this.model = new ControlsModel(this.scene.getState())
     this.view = new ControlsView(this.model)
     this.view.addEventListener(ControlEvent.STATE_CHANGE, this.handleStateEvent)
+    this.view.addEventListener(ControlEvent.RESET, this.handleResetEvent)
   }
 
   private readonly handleStateEvent = (event: Event): void => {
@@ -21,9 +22,22 @@ export class ControlsController {
     }
 
     const stateEvent = event as ControlEvent
+    if (!stateEvent.state) {
+      return
+    }
+
     const nextState: ControlsState = stateEvent.state
 
     this.scene.setState(nextState)
+    this.model.setState(this.scene.getState())
+  }
+
+  private readonly handleResetEvent = (event: Event): void => {
+    if (event.type !== ControlEvent.RESET) {
+      return
+    }
+
+    this.scene.reset()
     this.model.setState(this.scene.getState())
   }
 }
