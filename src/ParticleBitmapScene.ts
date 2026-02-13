@@ -11,6 +11,7 @@ export type SceneState = {
   isRunning: boolean
   fade: number
   clickForce: number
+  damping: number
 }
 
 const DEFAULT_OPTIONS: SceneOptions = {
@@ -45,6 +46,7 @@ export class ParticleBitmapScene {
       isRunning: false,
       fade: this.options.fade,
       clickForce: 200,
+      damping: 1,
     }
 
     this.stats = new Stats()
@@ -104,6 +106,7 @@ export class ParticleBitmapScene {
   public setState(nextState: SceneState): void {
     this.state.fade = Math.max(0.85, Math.min(1, nextState.fade))
     this.state.clickForce = Math.max(50, Math.min(500, nextState.clickForce))
+    this.state.damping = Math.max(0.5, Math.min(2, nextState.damping))
 
     if (nextState.isRunning) {
       this.start()
@@ -129,7 +132,8 @@ export class ParticleBitmapScene {
           color,
         )
 
-        p.damp = this.randomRange(50, 150) / 1000
+        p.baseDamp = this.randomRange(50, 150) / 1000
+        p.damp = p.baseDamp * this.state.damping
         p.homeForce = this.randomRange(30, 90) / 10000
         // Small jitter breaks strict scanline bands on dense grids.
         p.setTarLoc(
@@ -205,6 +209,7 @@ export class ParticleBitmapScene {
 
     let p = this.piece0
     while (p) {
+      p.damp = p.baseDamp * this.state.damping
       p.addForce(this.mouseX, this.mouseY, 100, force)
       p.seekHome()
       p.addDamping()

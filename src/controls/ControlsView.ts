@@ -16,6 +16,11 @@ export class ControlsView extends EventTarget {
   private readonly forceTitle: HTMLSpanElement
   private readonly forceValue: HTMLSpanElement
   private readonly forceSlider: HTMLInputElement
+  private readonly dampingLabel: HTMLLabelElement
+  private readonly dampingHead: HTMLDivElement
+  private readonly dampingTitle: HTMLSpanElement
+  private readonly dampingValue: HTMLSpanElement
+  private readonly dampingSlider: HTMLInputElement
 
   constructor(model: ControlsModel) {
     super()
@@ -75,10 +80,32 @@ export class ControlsView extends EventTarget {
     this.forceSlider.addEventListener('input', this.handleForceInput)
     this.forceLabel.appendChild(this.forceSlider)
 
+    this.dampingLabel = document.createElement('label')
+    this.dampingLabel.className = 'controls-fade'
+    this.dampingHead = document.createElement('div')
+    this.dampingHead.className = 'controls-line'
+    this.dampingTitle = document.createElement('span')
+    this.dampingTitle.textContent = 'Damping'
+    this.dampingHead.appendChild(this.dampingTitle)
+
+    this.dampingValue = document.createElement('span')
+    this.dampingValue.className = 'controls-fade-value'
+    this.dampingHead.appendChild(this.dampingValue)
+    this.dampingLabel.appendChild(this.dampingHead)
+
+    this.dampingSlider = document.createElement('input')
+    this.dampingSlider.type = 'range'
+    this.dampingSlider.min = '0.5'
+    this.dampingSlider.max = '2'
+    this.dampingSlider.step = '0.01'
+    this.dampingSlider.addEventListener('input', this.handleDampingInput)
+    this.dampingLabel.appendChild(this.dampingSlider)
+
     this.root.appendChild(this.toggleButton)
     this.root.appendChild(this.resetButton)
     this.root.appendChild(this.fadeLabel)
     this.root.appendChild(this.forceLabel)
+    this.root.appendChild(this.dampingLabel)
     document.body.appendChild(this.root)
 
     this.model.addEventListener('change', this.handleModelChange)
@@ -109,6 +136,14 @@ export class ControlsView extends EventTarget {
     })
   }
 
+  private readonly handleDampingInput = (): void => {
+    const currentState = this.model.getState()
+    this.emitState({
+      ...currentState,
+      damping: Number(this.dampingSlider.value),
+    })
+  }
+
   private readonly handleResetClick = (): void => {
     this.dispatchEvent(new ControlEvent(ControlEvent.RESET))
   }
@@ -125,6 +160,8 @@ export class ControlsView extends EventTarget {
     this.fadeValue.textContent = fade.toFixed(2)
     this.forceSlider.value = String(state.clickForce)
     this.forceValue.textContent = String(Math.round(state.clickForce))
+    this.dampingSlider.value = state.damping.toFixed(2)
+    this.dampingValue.textContent = state.damping.toFixed(2)
   }
 
   private emitState(state: ControlsState): void {

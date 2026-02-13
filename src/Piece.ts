@@ -2,6 +2,7 @@ export class Piece {
   public x: number
   public y: number
   public color: number
+  public baseDamp = 0
   public damp = 0
   public homeForce = 0
   public next: Piece | null = null
