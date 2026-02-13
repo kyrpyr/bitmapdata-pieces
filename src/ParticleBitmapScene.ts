@@ -60,9 +60,9 @@ export class ParticleBitmapScene {
     this.stats = new Stats()
     this.stats.showPanel(0)
     this.stats.dom.style.position = 'fixed'
-    this.stats.dom.style.left = 'auto'
-    this.stats.dom.style.right = '0'
-    this.stats.dom.style.top = '0'
+    this.stats.dom.style.left = '12px'
+    this.stats.dom.style.right = 'auto'
+    this.stats.dom.style.top = '12px'
     document.body.appendChild(this.stats.dom)
 
     root.innerHTML = '<canvas id="scene"></canvas>'
