@@ -2,8 +2,7 @@ import Stats from 'stats.js'
 import { Piece } from './Piece'
 
 type SceneOptions = {
-  cols: number
-  rows: number
+  dpi: number
   fade: number
 }
 
@@ -15,14 +14,18 @@ export type SceneState = {
   influenceRadius: number
   idleForce: number
   homeForceMultiplier: number
+  dpi: number
   particleCount: number
 }
 
 const DEFAULT_OPTIONS: SceneOptions = {
-  cols: 500,
-  rows: 500,
+  dpi: 1,
   fade: 0.9,
 }
+
+const BASE_PARTICLE_DENSITY = 0.204
+const MIN_PARTICLES = 10000
+const MAX_PARTICLES = 640000
 
 export class ParticleBitmapScene {
   private readonly canvas: HTMLCanvasElement
@@ -34,6 +37,8 @@ export class ParticleBitmapScene {
   private height = 0
   private imageData: ImageData
   private pixels: Uint8ClampedArray
+  private cols = 1
+  private rows = 1
   private targetStepX = 0
   private targetStepY = 0
   private piece0: Piece | null = null
@@ -54,7 +59,8 @@ export class ParticleBitmapScene {
       influenceRadius: 100,
       idleForce: -2,
       homeForceMultiplier: 1,
-      particleCount: this.options.cols,
+      dpi: this.options.dpi,
+      particleCount: 1,
     }
 
     this.stats = new Stats()
@@ -81,6 +87,7 @@ export class ParticleBitmapScene {
     this.imageData = this.ctx.createImageData(1, 1)
     this.pixels = this.imageData.data
     this.resizeCanvas()
+    this.updateParticleLayout()
     this.setupPieces()
   }
 
@@ -118,14 +125,20 @@ export class ParticleBitmapScene {
     this.state.influenceRadius = Math.max(20, Math.min(300, nextState.influenceRadius))
     this.state.idleForce = Math.max(-20, Math.min(20, nextState.idleForce))
     this.state.homeForceMultiplier = Math.max(0.1, Math.min(3, nextState.homeForceMultiplier))
-    const nextParticleCount = Math.max(100, Math.min(800, Math.round(nextState.particleCount)))
-    if (nextParticleCount !== this.state.particleCount) {
-      this.state.particleCount = nextParticleCount
-      this.options.cols = nextParticleCount
-      this.options.rows = nextParticleCount
-      this.targetStepX = this.width / this.options.cols
-      this.targetStepY = this.height / this.options.rows
-      this.setupPieces()
+    const nextDpi = Math.max(0.25, Math.min(2.5, nextState.dpi))
+    if (Math.abs(nextDpi - this.state.dpi) > Number.EPSILON) {
+      this.state.dpi = nextDpi
+      const layoutChanged = this.updateParticleLayout()
+      if (layoutChanged) {
+        this.setupPieces()
+      }
+    } else if (this.state.particleCount !== this.cols * this.rows) {
+      const layoutChanged = this.updateParticleLayout()
+      if (layoutChanged) {
+        this.setupPieces()
+      }
+    } else {
+      this.state.particleCount = this.cols * this.rows
     }
 
     if (nextState.isRunning) {
@@ -133,6 +146,28 @@ export class ParticleBitmapScene {
     } else {
       this.stop()
     }
+  }
+
+  private updateParticleLayout(): boolean {
+    const targetCount = Math.max(
+      MIN_PARTICLES,
+      Math.min(
+        MAX_PARTICLES,
+        Math.round(this.width * this.height * BASE_PARTICLE_DENSITY * this.state.dpi),
+      ),
+    )
+    const aspect = this.width / this.height
+    const nextCols = Math.max(1, Math.round(Math.sqrt(targetCount * aspect)))
+    const nextRows = Math.max(1, Math.round(targetCount / nextCols))
+
+    const changed = nextCols !== this.cols || nextRows !== this.rows
+    this.cols = nextCols
+    this.rows = nextRows
+    this.state.particleCount = this.cols * this.rows
+    this.targetStepX = this.width / this.cols
+    this.targetStepY = this.height / this.rows
+
+    return changed
   }
 
   public reset(): void {
@@ -143,9 +178,11 @@ export class ParticleBitmapScene {
     this.piece0 = null
     let prev: Piece | null = null
 
-    for (let i = 0; i < this.options.cols; i++) {
-      for (let j = 0; j < this.options.rows; j++) {
-        const color = ((j / this.options.cols) * 255 << 16) | ((i / this.options.rows) * 255 << 8) | 180
+    for (let i = 0; i < this.cols; i++) {
+      for (let j = 0; j < this.rows; j++) {
+        const red = Math.round((j / Math.max(1, this.rows - 1)) * 255)
+        const green = Math.round((i / Math.max(1, this.cols - 1)) * 255)
+        const color = (red << 16) | (green << 8) | 180
         const p = new Piece(
           this.randomRange(0, this.width - 1),
           this.randomRange(0, this.height - 1),
@@ -194,8 +231,7 @@ export class ParticleBitmapScene {
     this.imageData = this.ctx.createImageData(this.width, this.height)
     this.pixels = this.imageData.data
 
-    this.targetStepX = this.width / this.options.cols
-    this.targetStepY = this.height / this.options.rows
+    this.updateParticleLayout()
 
     this.mouseX = this.width / 2
     this.mouseY = this.height / 2

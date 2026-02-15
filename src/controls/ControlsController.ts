@@ -7,6 +7,7 @@ export class ControlsController {
   private readonly scene: ParticleBitmapScene
   private readonly model: ControlsModel
   private readonly view: ControlsView
+  private resizeSyncFrame: number | null = null
 
   constructor(scene: ParticleBitmapScene) {
     this.scene = scene
@@ -14,6 +15,7 @@ export class ControlsController {
     this.view = new ControlsView(this.model)
     this.view.addEventListener(ControlEvent.STATE_CHANGE, this.handleStateEvent)
     this.view.addEventListener(ControlEvent.RESET, this.handleResetEvent)
+    window.addEventListener('resize', this.handleViewportResize)
   }
 
   private readonly handleStateEvent = (event: Event): void => {
@@ -39,5 +41,16 @@ export class ControlsController {
 
     this.scene.reset()
     this.model.setState(this.scene.getState())
+  }
+
+  private readonly handleViewportResize = (): void => {
+    if (this.resizeSyncFrame !== null) {
+      cancelAnimationFrame(this.resizeSyncFrame)
+    }
+
+    this.resizeSyncFrame = requestAnimationFrame(() => {
+      this.resizeSyncFrame = null
+      this.model.setState(this.scene.getState())
+    })
   }
 }
